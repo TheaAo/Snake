@@ -21,6 +21,6 @@
 1. 蛇移动速度随分数增加而增加
 
 试玩地址：
-[贪吃蛇](https:\\theaao.github.io\Snake\index.html)
+[贪吃蛇](https:\\theaao.github.io\Snake\)
 
 
