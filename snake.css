@@ -2,11 +2,20 @@
 * @Author: Administrator
 * @Date:   2017-03-16 16:06:43
 * @Last Modified by:   Administrator
-* @Last Modified time: 2017-03-17 10:25:44
+* @Last Modified time: 2017-03-17 12:52:54
 */
 
 @media screen {
   body {
     text-align: center;
+  }
+  button {
+    width: 200px;
+    font: 20px Courier;
+    margin-top: 10px;
+    border: solid 1px orange;
+    background-color: white;
+    color: orange;
+    display: none;
   }
 }

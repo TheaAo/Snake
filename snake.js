@@ -2,50 +2,84 @@
 * @Author: Administrator
 * @Date:   2017-03-16 15:58:19
 * @Last Modified by:   Administrator
-* @Last Modified time: 2017-03-17 10:59:25
+* @Last Modified time: 2017-03-17 13:05:32
 */
 
 'use strict';
-
-var canvas = document.getElementById("canvas");
-var ctx = canvas.getContext("2d");
-var width = canvas.width;
-var height = canvas.height;
-
-// 以 10*10 像素的网格划分画布
 const BLOCKSIZE = 10;
-var widthInBlock = width / BLOCKSIZE;
-var heightInBlock = height / BLOCKSIZE;
 
-// 初始化分数
-var score = 0;
-
-// 绘制边框
-var drawBorder = function(){
-  ctx.fillStyle = "grey";
-  ctx.fillRect(0, 0, width, BLOCKSIZE);
-  ctx.fillRect(width - BLOCKSIZE, 0, BLOCKSIZE, height);
-  ctx.fillRect(0, 0, BLOCKSIZE, height);
-  ctx.fillRect(0, height - BLOCKSIZE, width, BLOCKSIZE);
+var Game = function(){
+  this.isStop;
+  this.isOver;
+  this.intervalId;
+  this.score;
+  this.canvas;
+  this.ctx;
+  this.width;
+  this.height
+  this.widthInBlock;
+  this.heightInBlock;
 };
+Game.prototype.init = function(){
+  this.canvas = document.getElementById("canvas");
+  this.ctx = this.canvas.getContext("2d");
+  this.width = this.canvas.width;
+  this.height = this.canvas.height;
 
-// 绘制分数
-var drawScore = function(){
-  ctx.font = "20px Courier";
-  ctx.fillStyle = "black";
-  ctx.textAlign = "left";
-  ctx.textBaseline = "top";
-  ctx.fillText("Score: " + score, BLOCKSIZE, BLOCKSIZE);
+  // 以 10*10 像素的网格划分画布
+  this.widthInBlock = this.width / BLOCKSIZE;
+  this.heightInBlock = this.height / BLOCKSIZE;
+
+  // 初始化分数和游戏状态
+  this.score = 0;
+  this.isStop = false;
+  this.isOver = false;
+  this.intervalId = null;
+
+  // 绘制边框和分数
+  this.drawBorder();
+  this.drawScore();
+  $("button").css("display","none");
+
 };
+Game.prototype.drawBorder = function(){
+    this.ctx.fillStyle = "grey";
+    this.ctx.fillRect(0, 0, this.width, BLOCKSIZE);
+    this.ctx.fillRect(this.width - BLOCKSIZE, 0, BLOCKSIZE, this.height);
+    this.ctx.fillRect(0, 0, BLOCKSIZE, this.height);
+    this.ctx.fillRect(0, this.height - BLOCKSIZE, this.width, BLOCKSIZE);
+  };
+Game.prototype.drawScore = function(){
+    this.ctx.font = "20px Courier";
+    this.ctx.fillStyle = "black";
+    this.ctx.textAlign = "left";
+    this.ctx.textBaseline = "top";
+    this.ctx.fillText("Score: " + this.score, BLOCKSIZE, BLOCKSIZE);
+  };
+Game.prototype.start = function(){
+  this.intervalId = setInterval(function(){
 
-// 结束游戏
-var gameOver = function(){
-  clearInterval(intervalId);
-  ctx.font = "60px Courier"
-  ctx.fillStyle = "black";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("GAME OVER", width / 2, height / 2);
+    game.ctx.clearRect(0, 0, game.width, game.height);
+    game.drawScore();
+    snake.draw();
+    snake.move();
+    apple.draw();
+    game.drawBorder();
+
+    },200);
+};
+Game.prototype.stop = function(){
+  clearInterval(this.intervalId);
+};
+Game.prototype.over = function(){
+  this.stop();
+  this.ctx.font = "60px Courier"
+  this.ctx.fillStyle = "black";
+  this.ctx.textAlign = "center";
+  this.ctx.textBaseline = "middle";
+  this.ctx.fillText("GAME OVER", this.width / 2, this.height / 2);
+  this.isOver = true;
+  $("button").css("display","inline-block");
 };
 
 // 构造块对象
@@ -56,17 +90,17 @@ var Block = function(col, row){
 Block.prototype.drawSquare = function(color){
   var x = this.col * BLOCKSIZE;
   var y = this.row * BLOCKSIZE;
-  ctx.fillStyle = color;
-  ctx.fillRect(x, y, BLOCKSIZE, BLOCKSIZE);
+  game.ctx.fillStyle = color;
+  game.ctx.fillRect(x, y, BLOCKSIZE, BLOCKSIZE);
 };
 Block.prototype.drawCircle = function(color){
   var x = (this.col + 0.5) * BLOCKSIZE;
   var y = (this.row + 0.5) * BLOCKSIZE;
   var r = BLOCKSIZE / 2;
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2, false);
-  ctx.fill();
+  game.ctx.fillStyle = color;
+  game.ctx.beginPath();
+  game.ctx.arc(x, y, r, 0, Math.PI * 2, false);
+  game.ctx.fill();
 };
 // 判断位置是否重合
 Block.prototype.equal = function(anotherBlock){
@@ -76,6 +110,11 @@ Block.prototype.equal = function(anotherBlock){
 // 贪吃蛇构造函数
 var Snake = function(color){
   this.color = color;
+  this.segment;
+  this.direction;
+  this.nextDirection;
+};
+Snake.prototype.init = function(){
   this.segment = [
     new Block(8,5),
     new Block(7,5),
@@ -109,13 +148,13 @@ Snake.prototype.move = function(){
   }
 
   if (this.checkCollision(newHead)) {
-    gameOver();
+    game.over();
     return;
   }
 
   this.segment.unshift(newHead);
   if (newHead.equal(apple.position)) {
-    score++;
+    game.score++;
     apple.move();
   }
   else {
@@ -124,8 +163,8 @@ Snake.prototype.move = function(){
 };
 Snake.prototype.checkCollision = function(head){
   var topCollision = (head.row == 0);
-  var rightCollision = (head.col == widthInBlock - 1);
-  var bottomCollision = (head.row == heightInBlock - 1);
+  var rightCollision = (head.col == game.widthInBlock - 1);
+  var bottomCollision = (head.row == game.heightInBlock - 1);
   var leftCollision = (head.col == 0);
 
   var wallCollision = topCollision || rightCollision || bottomCollision || leftCollision;
@@ -159,6 +198,9 @@ Snake.prototype.setDirection = function(newDirection){
 
 // 创建苹果
 var Apple = function() {
+  this.position;
+};
+Apple.prototype.init = function(){
   this.position = new Block(10,10);
 };
 Apple.prototype.draw = function(){
@@ -166,8 +208,8 @@ Apple.prototype.draw = function(){
 };
 Apple.prototype.move = function(){
   
-  var randomCol = Math.floor(Math.random() * (widthInBlock - 2) + 1);
-  var randomRow = Math.floor(Math.random() * (heightInBlock - 2) + 1);
+  var randomCol = Math.floor(Math.random() * (game.widthInBlock - 2) + 1);
+  var randomRow = Math.floor(Math.random() * (game.heightInBlock - 2) + 1);
   this.position = new Block(randomCol, randomRow);
 
   for (var i = 0; i < snake.length; i++) {
@@ -179,19 +221,15 @@ Apple.prototype.move = function(){
 
 var snake = new Snake();
 var apple = new Apple();
+var game = new Game();
 
-var intervalId = setInterval(function(){
-  ctx.clearRect(0, 0, width, height);
-
-  drawScore();
-  snake.draw();
-  snake.move();
-  apple.draw();
-  drawBorder();
-
-},200);
+snake.init();
+apple.init();
+game.init();
+game.start();
 
 var directions = {
+  32: "space",
   37: "left",
   38: "up",
   39: "right",
@@ -201,6 +239,24 @@ var directions = {
 $("body").keydown(function(event){
   var newDirection = directions[event.keyCode];
   if (newDirection != undefined) {
-    snake.setDirection(newDirection);
+    if (newDirection != "space") {
+      snake.setDirection(newDirection);
+    }
+    else {
+      if (game.isStop) {
+        game.start();
+      }
+      else {
+        game.stop();
+      }
+      game.isStop = !game.isStop;
+    }
   }
+});
+// 绑定按钮事件
+$("button").click(function(){
+  game.init();
+  snake.init();
+  apple.init();
+  game.start();
 });
