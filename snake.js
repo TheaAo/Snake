@@ -2,7 +2,7 @@
 * @Author: Administrator
 * @Date:   2017-03-16 15:58:19
 * @Last Modified by:   Administrator
-* @Last Modified time: 2017-03-17 13:05:32
+* @Last Modified time: 2017-03-17 14:54:24
 */
 
 'use strict';
@@ -19,12 +19,14 @@ var Game = function(){
   this.height
   this.widthInBlock;
   this.heightInBlock;
+  this.speed;
 };
 Game.prototype.init = function(){
   this.canvas = document.getElementById("canvas");
   this.ctx = this.canvas.getContext("2d");
   this.width = this.canvas.width;
   this.height = this.canvas.height;
+  this.speed = 200;
 
   // 以 10*10 像素的网格划分画布
   this.widthInBlock = this.width / BLOCKSIZE;
@@ -56,7 +58,7 @@ Game.prototype.drawScore = function(){
     this.ctx.textBaseline = "top";
     this.ctx.fillText("Score: " + this.score, BLOCKSIZE, BLOCKSIZE);
   };
-Game.prototype.start = function(){
+Game.prototype.start = function(speed){
   this.intervalId = setInterval(function(){
 
     game.ctx.clearRect(0, 0, game.width, game.height);
@@ -66,7 +68,7 @@ Game.prototype.start = function(){
     apple.draw();
     game.drawBorder();
 
-    },200);
+    },speed);
 };
 Game.prototype.stop = function(){
   clearInterval(this.intervalId);
@@ -108,8 +110,7 @@ Block.prototype.equal = function(anotherBlock){
 };
 
 // 贪吃蛇构造函数
-var Snake = function(color){
-  this.color = color;
+var Snake = function(){
   this.segment;
   this.direction;
   this.nextDirection;
@@ -212,6 +213,7 @@ Apple.prototype.move = function(){
   var randomRow = Math.floor(Math.random() * (game.heightInBlock - 2) + 1);
   this.position = new Block(randomCol, randomRow);
 
+  //检测刷新位置
   for (var i = 0; i < snake.length; i++) {
     if(this.position.equal(snake.segment[i])){
       this.move();
@@ -226,7 +228,7 @@ var game = new Game();
 snake.init();
 apple.init();
 game.init();
-game.start();
+game.start(game.speed);
 
 var directions = {
   32: "space",
@@ -255,8 +257,8 @@ $("body").keydown(function(event){
 });
 // 绑定按钮事件
 $("button").click(function(){
-  game.init();
   snake.init();
   apple.init();
-  game.start();
+  game.init();
+  game.start(game.speed);
 });

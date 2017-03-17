@@ -2,12 +2,13 @@
 * @Author: Administrator
 * @Date:   2017-03-16 16:06:43
 * @Last Modified by:   Administrator
-* @Last Modified time: 2017-03-17 12:52:54
+* @Last Modified time: 2017-03-17 14:55:28
 */
 
 @media screen {
   body {
     text-align: center;
+    padding: 100px;
   }
   button {
     width: 200px;
