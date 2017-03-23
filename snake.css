@@ -2,7 +2,7 @@
 * @Author: Administrator
 * @Date:   2017-03-16 16:06:43
 * @Last Modified by:   Administrator
-* @Last Modified time: 2017-03-17 14:55:28
+* @Last Modified time: 2017-03-23 21:44:48
 */
 
 @media screen {
@@ -18,5 +18,9 @@
     background-color: white;
     color: orange;
     display: none;
+  }
+  span.fa {
+    color: grey;
+    margin: 20px;
   }
 }

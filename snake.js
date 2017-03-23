@@ -2,7 +2,7 @@
 * @Author: Administrator
 * @Date:   2017-03-16 15:58:19
 * @Last Modified by:   Administrator
-* @Last Modified time: 2017-03-17 14:54:24
+* @Last Modified time: 2017-03-23 21:45:09
 */
 
 'use strict';
@@ -20,6 +20,7 @@ var Game = function(){
   this.widthInBlock;
   this.heightInBlock;
   this.speed;
+  this.threshold;
 };
 Game.prototype.init = function(){
   this.canvas = document.getElementById("canvas");
@@ -27,6 +28,7 @@ Game.prototype.init = function(){
   this.width = this.canvas.width;
   this.height = this.canvas.height;
   this.speed = 200;
+  this.threshold = 9;
 
   // 以 10*10 像素的网格划分画布
   this.widthInBlock = this.width / BLOCKSIZE;
@@ -58,7 +60,9 @@ Game.prototype.drawScore = function(){
     this.ctx.textBaseline = "top";
     this.ctx.fillText("Score: " + this.score, BLOCKSIZE, BLOCKSIZE);
   };
-Game.prototype.start = function(speed){
+
+Game.prototype.start = function(threshold,speed){
+
   this.intervalId = setInterval(function(){
 
     game.ctx.clearRect(0, 0, game.width, game.height);
@@ -67,9 +71,15 @@ Game.prototype.start = function(speed){
     snake.move();
     apple.draw();
     game.drawBorder();
-
-    },speed);
+    if (game.score > threshold) {
+      clearInterval(game.intervalId);
+      game.threshold = threshold + 10;
+      game.speed = speed - 50;
+      game.start(game.threshold,game.speed);
+    }
+  },speed);
 };
+
 Game.prototype.stop = function(){
   clearInterval(this.intervalId);
 };
@@ -228,7 +238,7 @@ var game = new Game();
 snake.init();
 apple.init();
 game.init();
-game.start(game.speed);
+game.start(game.threshold,game.speed);
 
 var directions = {
   32: "space",
@@ -246,7 +256,7 @@ $("body").keydown(function(event){
     }
     else {
       if (game.isStop) {
-        game.start();
+        game.start(game.threshold,game.speed);
       }
       else {
         game.stop();
@@ -260,5 +270,17 @@ $("button").click(function(){
   snake.init();
   apple.init();
   game.init();
-  game.start(game.speed);
+  game.start(game.threshold,game.speed);
+});
+$(".fa-arrow-up").click(function(){
+  snake.setDirection("up");
+});
+$(".fa-arrow-down").click(function(){
+  snake.setDirection("down");
+});
+$(".fa-arrow-left").click(function(){
+  snake.setDirection("left");
+});
+$(".fa-arrow-right").click(function(){
+  snake.setDirection("right");
 });
